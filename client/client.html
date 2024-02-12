@@ -5,7 +5,69 @@
   <link rel="stylesheet" type="text/css" href="/style.css">
   
   <script>
+    const sendFetch = async () => {
+      const url = document.getElementById('page').value;
+      const type = document.getElementById('type').value;
 
+      const options = {
+        headers: { 'Accept': type }
+      };
+
+      const response = await fetch(url, options);
+      handleResponse(response);
+    };
+
+    const init = () => {
+      const send = document.getElementById('send');
+      send.addEventListener('click', sendFetch);
+    };
+    
+    window.onload = init;
+
+  const handleResponse = async (response) => {
+    const content = document.getElementById('content')
+    const responseText = await response.text();
+    const contentType = response.headers.get('Content-Type');
+
+  console.log(responseText);
+
+  switch(response.status) {
+        case 200:
+          content.innerHTML = '<b>Success</b>';
+          break;
+        case 400:
+          content.innerHTML = '<b>Bad Request</b>';
+          break;
+        case 401:
+          content.innerHTML = '<b>Unauthorized</b>';
+          break;
+        case 403:
+          content.innerHTML = '<b>Forbidden</b>';
+          break;
+        case 404:
+          content.innerHTML = '<b>Resource Not Found</b>';
+        break;
+        case 500:
+          content.innerHTML = '<b>Internal Server Error</b>';
+          break;
+        case 501: 
+          content.innerHTML = '<b>Not Implemented</b>';
+          break;
+        default:
+          content.innerHTML = '<p>Status code not implemented by client</p>';
+          break;
+      }
+
+      if(contentType == 'text/xml'){
+        const parsedResponse = new window.DOMParser().parseFromString(responseText, 'text/xml');
+        content.innerHTML += `<p>Message: ${parsedResponse.querySelector('message').textContent}</p>`;
+      }
+      else {
+        const parsedResponse = JSON.parse(responseText);
+        content.innerHTML += `<p>Message: ${parsedResponse.message}</p>`;
+      }
+
+};
   </script>
 </head>
 <body>
